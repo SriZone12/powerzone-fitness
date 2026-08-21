@@ -167,7 +167,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-8">
           <button onClick={() => setActiveModal('members')}
             className="bg-gray-900 rounded-lg p-4 sm:p-6 text-left hover:bg-gray-800 transition cursor-pointer border-2 border-transparent hover:border-orange-500">
             <h3 className="text-gray-400 mb-2 text-sm">Total Members</h3>
@@ -190,15 +190,10 @@ export default function AdminDashboard() {
             </p>
             <p className="text-orange-500 text-xs mt-2">Click to view &#8594;</p>
           </button>
-
-          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-gray-400 mb-2 text-sm">Members with Plans</h3>
-            <p className="text-2xl sm:text-4xl font-bold text-blue-500">{members.filter(m => memberships.some(mb => mb.user_id === m.id && mb.status === 'active')).length}</p>
-          </div>
         </div>
 
         {/* Management Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
           <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
             <h3 className="text-lg font-bold text-white mb-2">Membership Plans</h3>
             <p className="text-gray-400 text-sm mb-4">Create and manage plans</p>
@@ -209,30 +204,6 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-bold text-white mb-2">Payments</h3>
             <p className="text-gray-400 text-sm mb-4">Confirm member payments</p>
             <button onClick={() => router.push('/admin/payments')} className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Manage Payments</button>
-          </div>
-
-          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold text-white mb-2">Member Management</h3>
-            <p className="text-gray-400 text-sm mb-4">Setup plans, manage members</p>
-            <button onClick={() => router.push('/admin/staff')} className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">Manage Members</button>
-          </div>
-
-          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold text-white mb-2">Classes</h3>
-            <p className="text-gray-400 text-sm mb-4">Manage gym classes</p>
-            <button onClick={() => router.push('/admin/classes')} className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">Manage Classes</button>
-          </div>
-
-          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold text-white mb-2">Attendance</h3>
-            <p className="text-gray-400 text-sm mb-4">View reports & analytics</p>
-            <button onClick={() => router.push('/admin/attendance')} className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">View Reports</button>
-          </div>
-
-          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold text-white mb-2">Notice Board</h3>
-            <p className="text-gray-400 text-sm mb-4">Post announcements</p>
-            <button onClick={() => router.push('/admin/notices')} className="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">Manage Notices</button>
           </div>
         </div>
 

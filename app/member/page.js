@@ -12,7 +12,6 @@ export default function MemberDashboard() {
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [plans, setPlans] = useState([])
   const [submitting, setSubmitting] = useState(false)
-  const [notices, setNotices] = useState([])
   const [showFreezeModal, setShowFreezeModal] = useState(false)
   const [freezeForm, setFreezeForm] = useState({ start_date: '', end_date: '', reason: '' })
 
@@ -100,18 +99,6 @@ export default function MemberDashboard() {
         .order('price', { ascending: true })
 
       setPlans(plansData || [])
-
-      // Fetch notices
-      const { data: noticesData } = await supabase
-        .from('gym_notices')
-        .select('*')
-        .eq('is_active', true)
-        .in('target_audience', ['all', 'members'])
-        .order('priority', { ascending: true })
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      setNotices(noticesData || [])
       setLoading(false)
     }
 
@@ -423,72 +410,19 @@ export default function MemberDashboard() {
           )}
         </div>
 
-        {/* Notices */}
-        {notices.length > 0 && (
-          <div className="mt-6 sm:mt-8">
-            <h3 className="text-xl font-bold text-white mb-4">📢 Announcements</h3>
-            <div className="space-y-3">
-              {notices.map(notice => (
-                <div
-                  key={notice.id}
-                  className={`rounded-lg p-4 border-l-4 ${
-                    notice.priority === 'urgent' ? 'border-l-red-500 bg-red-900' :
-                    notice.priority === 'high' ? 'border-l-yellow-500 bg-yellow-900' :
-                    'border-l-blue-500 bg-gray-900'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-white font-bold">{notice.title}</h4>
-                    {notice.priority === 'urgent' && <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded">URGENT</span>}
-                    {notice.priority === 'high' && <span className="bg-yellow-600 text-white text-xs px-2 py-0.5 rounded">HIGH</span>}
-                  </div>
-                  <p className="text-gray-300 text-sm whitespace-pre-wrap">{notice.content}</p>
-                  <p className="text-gray-500 text-xs mt-2">{new Date(notice.created_at).toLocaleDateString()}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4">
-          {/* Personal Training */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
           <div className="bg-gray-900 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-white mb-3">Personal Training</h3>
-            <p className="text-gray-400 text-sm mb-4">View schedule & progress</p>
-            <button 
-              onClick={() => router.push('/member/pt')}
-              className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 text-sm"
-            >
-              My PT Dashboard
-            </button>
-          </div>
-
-          {/* Classes */}
-          <div className="bg-gray-900 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-white mb-3">Classes</h3>
-            <p className="text-gray-400 text-sm mb-4">Browse & book gym classes</p>
+            <h3 className="text-lg font-bold text-white mb-3">Membership Plans</h3>
+            <p className="text-gray-400 text-sm mb-4">Browse & buy gym memberships</p>
             <button
-              onClick={() => router.push('/member/classes')}
+              onClick={() => router.push('/member/plans')}
               className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 text-sm"
             >
-              View Classes
+              View Plans
             </button>
           </div>
 
-          {/* Attendance */}
-          <div className="bg-gray-900 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-white mb-3">My Attendance</h3>
-            <p className="text-gray-400 text-sm mb-4">Check your attendance history</p>
-            <button
-              onClick={() => router.push('/member/attendance')}
-              className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 text-sm"
-            >
-              View History
-            </button>
-          </div>
-
-          {/* Payments */}
           <div className="bg-gray-900 rounded-lg p-6">
             <h3 className="text-lg font-bold text-white mb-3">Payments</h3>
             <p className="text-gray-400 text-sm mb-4">View your payment history</p>
