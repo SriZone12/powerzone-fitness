@@ -1,6 +1,7 @@
 -- =====================================================
 -- POWERZONE FITNESS - COMPLETE DATABASE SETUP
 -- Run this ONCE in Supabase SQL Editor
+-- Safe to run multiple times (uses IF NOT EXISTS)
 -- =====================================================
 
 -- 1. MEMBERSHIP PLANS
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS app_users (
   account_status TEXT DEFAULT 'active',
   existing_member_claim BOOLEAN DEFAULT false,
   claim_status TEXT DEFAULT 'none',
+  is_pre_app_member BOOLEAN DEFAULT false,
   specialization TEXT,
   experience TEXT,
   bio TEXT,
@@ -186,18 +188,23 @@ CREATE TABLE IF NOT EXISTS gym_settings (
 );
 
 -- =====================================================
+-- ADD MISSING COLUMNS (safe to run multiple times)
+-- =====================================================
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS is_new_member BOOLEAN DEFAULT true;
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS admission_fee_paid BOOLEAN DEFAULT false;
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS account_status TEXT DEFAULT 'active';
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS existing_member_claim BOOLEAN DEFAULT false;
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS claim_status TEXT DEFAULT 'none';
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS is_pre_app_member BOOLEAN DEFAULT false;
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS specialization TEXT;
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS experience TEXT;
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS bio TEXT;
+
+-- =====================================================
 -- DEFAULT SETTINGS
 -- =====================================================
 INSERT INTO gym_settings (key, value) VALUES ('admission_fee', '1000')
 ON CONFLICT (key) DO NOTHING;
-
--- =====================================================
--- INSERT DEFAULT ADMIN USER
--- (Run ONLY if admin was deleted)
--- =====================================================
--- INSERT INTO app_users (id, email, full_name, phone, role, account_status, is_new_member, admission_fee_paid)
--- VALUES ('663573a7-5451-42c3-9ed5-0ac20bbf98c4', 'dhirajan1@gmail.com', 'Dhirajan Admin', '9841000000', 'admin', 'active', false, true)
--- ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
 -- DISABLE RLS ON ALL TABLES (app handles auth)
@@ -236,6 +243,7 @@ GRANT ALL ON gym_notices TO anon, authenticated;
 GRANT ALL ON gym_settings TO anon, authenticated;
 
 -- =====================================================
--- DONE! All 14 tables created, RLS disabled,
--- permissions granted, admission fee set to 1000 NPR.
+-- DONE! All 14 tables, all columns, RLS disabled,
+-- permissions granted, admission fee = 1000 NPR.
+-- Safe to run multiple times.
 -- =====================================================
