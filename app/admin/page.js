@@ -186,7 +186,7 @@ export default function AdminDashboard() {
             className="bg-gray-900 rounded-lg p-4 sm:p-6 text-left hover:bg-gray-800 transition cursor-pointer border-2 border-transparent hover:border-orange-500">
             <h3 className="text-gray-400 mb-2 text-sm">Total Revenue</h3>
             <p className="text-2xl sm:text-4xl font-bold text-orange-500">
-              &#8377;{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)}
+              रू{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)}
             </p>
             <p className="text-orange-500 text-xs mt-2">Click to view &#8594;</p>
           </button>
@@ -373,7 +373,7 @@ export default function AdminDashboard() {
               {activeModal === 'revenue' && (
                 <div>
                   <p className="text-gray-400 mb-4">
-                    &#8377;{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)}
+                    रू{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)}
                     {' '}total from {memberships.filter(m => m.payment_status === 'confirmed').length} payments
                   </p>
                   {memberships.filter(m => m.payment_status === 'confirmed').length === 0 ? (
@@ -388,9 +388,9 @@ export default function AdminDashboard() {
                               <p className="text-gray-400 text-xs">{m.membership_plan?.name}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-orange-500 font-bold">&#8377;{m.membership_plan?.price}</p>
+                              <p className="text-orange-500 font-bold">रू{m.membership_plan?.price}</p>
                               {m.admission_fee > 0 && (
-                                <p className="text-yellow-500 text-xs">+ &#8377;{m.admission_fee} admission</p>
+                                <p className="text-yellow-500 text-xs">+ रू{m.admission_fee} admission</p>
                               )}
                               <p className="text-green-500 text-xs">Confirmed</p>
                             </div>
