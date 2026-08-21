@@ -103,7 +103,7 @@ export default function MemberPT() {
         <div className="max-w-6xl mx-auto p-4 sm:p-8">
           <div className="bg-gray-900 rounded-lg p-8 text-center">
             <h2 className="text-2xl font-bold text-white mb-4">No Active PT Package</h2>
-            <p className="text-gray-400 mb-6">You don't have a personal training subscription yet.</p>
+            <p className="text-gray-400 mb-6">You don&apos;t have a personal training subscription yet.</p>
             <button
               onClick={() => router.push('/member/pt/buy')}
               className="bg-orange-500 text-white px-6 py-3 rounded font-bold hover:bg-orange-600"

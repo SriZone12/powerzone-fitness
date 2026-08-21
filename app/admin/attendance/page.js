@@ -95,7 +95,7 @@ export default function AdminAttendance() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-gray-900 rounded-lg p-3">
-            <p className="text-gray-400 text-xs sm:text-sm">Today's Check-ins</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Today&apos;s Check-ins</p>
             <p className="text-lg sm:text-2xl font-bold text-orange-500">{todayCount}</p>
           </div>
           <div className="bg-gray-900 rounded-lg p-3">

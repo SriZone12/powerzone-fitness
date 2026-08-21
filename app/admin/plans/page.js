@@ -202,7 +202,7 @@ export default function AdminPlans() {
                 {plans.length === 0 && (
                   <tr>
                     <td colSpan="6" className="p-4 text-center text-gray-400">
-                      No plans created yet. Click "Add New Plan" to create one.
+                      No plans created yet. Click &quot;Add New Plan&quot; to create one.
                     </td>
                   </tr>
                 )}

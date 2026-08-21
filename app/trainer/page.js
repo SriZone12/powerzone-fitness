@@ -175,7 +175,7 @@ export default function TrainerDashboard() {
             <p className="text-lg sm:text-2xl font-bold text-white">{myMembers.length}</p>
           </div>
           <div className="bg-gray-900 rounded-lg p-3 sm:p-4">
-            <p className="text-gray-400 text-xs sm:text-sm">Today's Sessions</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Today&apos;s Sessions</p>
             <p className="text-lg sm:text-2xl font-bold text-orange-500">{todaySessions.length}</p>
           </div>
           <div className="bg-gray-900 rounded-lg p-3 sm:p-4">
@@ -229,7 +229,7 @@ export default function TrainerDashboard() {
             onClick={() => setTab('today')}
             className={`px-4 py-2 rounded text-sm ${tab === 'today' ? 'bg-orange-500 text-white' : 'bg-gray-700 text-gray-300'}`}
           >
-            Today's Sessions ({todaySessions.length})
+            Today&apos;s Sessions ({todaySessions.length})
           </button>
           <button
             onClick={() => setTab('members')}
@@ -249,7 +249,7 @@ export default function TrainerDashboard() {
         {tab === 'today' && (
           <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
             <h3 className="text-xl font-bold text-white mb-4">
-              Today's Sessions ({new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })})
+              Today&apos;s Sessions ({new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })})
             </h3>
             {todaySessions.length === 0 ? (
               <p className="text-gray-400">No sessions scheduled for today.</p>
