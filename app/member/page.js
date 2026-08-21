@@ -305,7 +305,10 @@ export default function MemberDashboard() {
           <h1 className="text-xl sm:text-2xl font-bold text-white">Powerzone Fitness</h1>
           <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
             <span className="text-gray-400 text-sm">Welcome, {user?.full_name}</span>
-            {user?.is_new_member && user?.claim_status !== 'approved' && (
+            {user?.is_pre_app_member && (
+              <span className="bg-purple-500 text-white px-2 py-0.5 rounded text-xs font-bold">Pre-App Member</span>
+            )}
+            {!user?.is_pre_app_member && user?.is_new_member && user?.claim_status !== 'approved' && (
               <span className="bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold">New Member</span>
             )}
             {user?.claim_status === 'pending' && (
