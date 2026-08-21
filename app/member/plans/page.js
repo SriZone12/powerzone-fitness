@@ -119,12 +119,13 @@ export default function MemberPlans() {
     if (userProfile.admission_fee_paid) return false
     if (!userProfile.is_new_member) return false
     if (userProfile.claim_status === 'approved') return false
-    return plan.duration_days <= 31
+    if (!plan.admission_fee || plan.admission_fee <= 0) return false
+    return true
   }
 
   const getTotalPrice = (plan) => {
     if (shouldChargeAdmission(plan)) {
-      return plan.price + admissionFee
+      return plan.price + (plan.admission_fee || 0)
     }
     return plan.price
   }
@@ -166,7 +167,7 @@ export default function MemberPlans() {
     const endDate = new Date()
     endDate.setDate(endDate.getDate() + selectedPlan.duration_days)
 
-    const fee = shouldChargeAdmission(selectedPlan) ? admissionFee : 0
+    const fee = shouldChargeAdmission(selectedPlan) ? (selectedPlan.admission_fee || 0) : 0
 
     const { error } = await supabase
       .from('member_memberships')
@@ -264,8 +265,8 @@ export default function MemberPlans() {
         )}
 
         <h2 className="text-3xl font-bold text-white mb-2">Available Plans</h2>
-        {userProfile && userProfile.is_new_member && !userProfile.admission_fee_paid && admissionFee > 0 && (
-          <p className="text-yellow-500 text-sm mb-6">New members taking a 1-month plan pay an additional रू{admissionFee} admission fee (one-time only). 3-month and 6-month plans have no admission fee.</p>
+        {userProfile && userProfile.is_new_member && !userProfile.admission_fee_paid && selectedPlan && selectedPlan.admission_fee > 0 && (
+          <p className="text-yellow-500 text-sm mb-6">New members pay an additional रू{selectedPlan.admission_fee} admission fee (one-time only).</p>
         )}
 
         {plans.length === 0 ? (
@@ -283,7 +284,7 @@ export default function MemberPlans() {
                   <div className="text-4xl font-bold text-orange-500 mb-2">रू{plan.price}</div>
                   <p className="text-gray-400 mb-1">{plan.duration_days} days access</p>
                   {hasAdmission && (
-                    <p className="text-yellow-500 text-sm mb-2">+ रू{admissionFee} admission fee (one-time)</p>
+                    <p className="text-yellow-500 text-sm mb-2">+ रू{selectedPlan.admission_fee} admission fee (one-time)</p>
                   )}
                   {hasAdmission && (
                     <p className="text-white font-bold text-lg mb-2">Total: रू{total}</p>
@@ -321,7 +322,7 @@ export default function MemberPlans() {
               <div className="mt-2 space-y-1">
                 <p className="text-gray-400 text-sm">Plan Price: <span className="text-white">रू{selectedPlan.price}</span></p>
                 {shouldChargeAdmission(selectedPlan) && (
-                  <p className="text-yellow-500 text-sm">Admission Fee (one-time): <span className="text-white">रू{admissionFee}</span></p>
+                  <p className="text-yellow-500 text-sm">Admission Fee (one-time): <span className="text-white">रू{selectedPlan.admission_fee || 0}</span></p>
                 )}
                 <p className="text-orange-500 font-bold text-2xl mt-2">Total: रू{getTotalPrice(selectedPlan)}</p>
               </div>
@@ -356,7 +357,7 @@ export default function MemberPlans() {
                 <li>2. Tell them you want to pay for membership</li>
                 <li>3. Pay रू{getTotalPrice(selectedPlan)} in cash</li>
                 {shouldChargeAdmission(selectedPlan) && (
-                  <li className="text-yellow-300">4. Includes रू{admissionFee} admission fee (one-time)</li>
+                  <li className="text-yellow-300">4. Includes रू{selectedPlan.admission_fee || 0} admission fee (one-time)</li>
                 )}
                 <li>{shouldChargeAdmission(selectedPlan) ? '5' : '4'}. Your membership will be activated after admin confirms</li>
               </ol>

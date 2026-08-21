@@ -13,7 +13,8 @@ export default function AdminPlans() {
     name: '',
     price: '',
     duration_days: '',
-    description: ''
+    description: '',
+    admission_fee: ''
   })
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function AdminPlans() {
       price: parseFloat(formData.price),
       duration_days: parseInt(formData.duration_days),
       description: formData.description,
+      admission_fee: formData.admission_fee ? parseFloat(formData.admission_fee) : 0,
       is_active: true
     }
 
@@ -91,7 +93,8 @@ export default function AdminPlans() {
       name: plan.name,
       price: plan.price.toString(),
       duration_days: plan.duration_days.toString(),
-      description: plan.description || ''
+      description: plan.description || '',
+      admission_fee: (plan.admission_fee || 0).toString()
     })
     setShowModal(true)
   }
@@ -114,7 +117,8 @@ export default function AdminPlans() {
       name: '',
       price: '',
       duration_days: '',
-      description: ''
+      description: '',
+      admission_fee: ''
     })
   }
 
@@ -252,6 +256,17 @@ export default function AdminPlans() {
                   placeholder="e.g., 30"
                   required
                 />
+              </div>
+              <div className="mb-4">
+                <label className="block text-white mb-2">Admission Fee (रू) <span className="text-gray-500 text-sm">— optional</span></label>
+                <input
+                  type="number"
+                  value={formData.admission_fee}
+                  onChange={(e) => setFormData({...formData, admission_fee: e.target.value})}
+                  className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700"
+                  placeholder="e.g., 1000 (leave empty = no fee)"
+                />
+                <p className="text-gray-500 text-xs mt-1">Leave empty or 0 if this plan should not charge admission fee</p>
               </div>
               <div className="mb-6">
                 <label className="block text-white mb-2">Description</label>

@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS membership_plan (
   price NUMERIC NOT NULL,
   duration_days INTEGER NOT NULL,
   description TEXT,
+  admission_fee NUMERIC DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -199,6 +200,7 @@ ALTER TABLE app_users ADD COLUMN IF NOT EXISTS is_pre_app_member BOOLEAN DEFAULT
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS specialization TEXT;
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS experience TEXT;
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE membership_plan ADD COLUMN IF NOT EXISTS admission_fee NUMERIC DEFAULT 0;
 
 -- =====================================================
 -- DEFAULT SETTINGS
