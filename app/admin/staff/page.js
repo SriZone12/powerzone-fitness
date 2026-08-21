@@ -246,14 +246,12 @@ export default function AdminStaff() {
                           >
                             {u.is_pre_app_member ? 'Pre-App' : 'App Member'}
                           </button>
-                          {u.is_pre_app_member && (
-                            <button
-                              onClick={() => openSetupModal(u)}
-                              className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold hover:bg-blue-600"
-                            >
-                              Setup Plan
-                            </button>
-                          )}
+                          <button
+                            onClick={() => openSetupModal(u)}
+                            className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold hover:bg-blue-600"
+                          >
+                            Setup Plan
+                          </button>
                         </div>
                       ) : (
                         <span className="text-gray-500 text-xs">-</span>
