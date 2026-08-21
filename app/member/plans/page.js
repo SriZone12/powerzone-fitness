@@ -114,7 +114,6 @@ export default function MemberPlans() {
 
   const shouldChargeAdmission = (plan) => {
     if (!userProfile) return false
-    if (userProfile.is_pre_app_member) return false
     if (userProfile.admission_fee_paid) return false
     if (!userProfile.is_new_member) return false
     if (userProfile.claim_status === 'approved') return false

@@ -192,9 +192,8 @@ export default function AdminDashboard() {
           </button>
 
           <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-gray-400 mb-2 text-sm">Pre-App Members</h3>
-            <p className="text-2xl sm:text-4xl font-bold text-purple-500">{members.filter(m => m.is_pre_app_member).length}</p>
-            <p className="text-purple-400 text-xs mt-2">Already paying before app</p>
+            <h3 className="text-gray-400 mb-2 text-sm">Members with Plans</h3>
+            <p className="text-2xl sm:text-4xl font-bold text-blue-500">{members.filter(m => memberships.some(mb => mb.user_id === m.id && mb.status === 'active')).length}</p>
           </div>
         </div>
 
@@ -263,9 +262,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="p-3 text-gray-400">{member.phone || 'N/A'}</td>
                       <td className="p-3">
-                        {member.is_pre_app_member ? (
-                          <span className="bg-purple-500 text-white px-2 py-1 rounded text-xs font-bold">Pre-App</span>
-                        ) : member.is_new_member ? (
+                        {member.is_new_member ? (
                           <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">New</span>
                         ) : (
                           <span className="bg-gray-600 text-white px-2 py-1 rounded text-xs">Existing</span>
@@ -321,8 +318,8 @@ export default function AdminDashboard() {
                               <div>
                                 <p className="text-white font-bold">{member.full_name}</p>
                                 <p className="text-gray-400 text-sm">{member.email}</p>
-                                <span className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${member.is_pre_app_member ? 'bg-purple-500 text-white' : member.is_new_member ? 'bg-green-500 text-white' : 'bg-gray-600 text-white'}`}>
-                                  {member.is_pre_app_member ? 'Pre-App Member' : member.is_new_member ? 'New Member' : 'Existing Member'}
+                                <span className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${member.is_new_member ? 'bg-green-500 text-white' : 'bg-gray-600 text-white'}`}>
+                                  {member.is_new_member ? 'New Member' : 'Existing Member'}
                                 </span>
                               </div>
                               <div className="text-right">
