@@ -26,7 +26,7 @@ export default function AdminNotices() {
         .single()
 
       if (userData.role === 'member') { router.push('/member'); return }
-      if (userData.role === 'trainer') { router.push('/trainer'); return }
+      if (userData.role !== 'admin') { router.push('/member'); return }
 
       setUser(session.user)
       fetchNotices()
@@ -126,9 +126,7 @@ export default function AdminNotices() {
 
   const audienceLabel = {
     all: 'Everyone',
-    members: 'Members Only',
-    trainer: 'Trainer Only',
-    trainers: 'Trainers Only'
+    members: 'Members Only'
   }
 
   if (loading) {
@@ -309,8 +307,6 @@ export default function AdminNotices() {
                   >
                     <option value="all">Everyone</option>
                     <option value="members">Members Only</option>
-                    <option value="trainer">Trainer Only</option>
-                    <option value="trainers">Trainers Only</option>
                   </select>
                 </div>
               </div>

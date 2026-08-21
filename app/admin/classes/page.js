@@ -7,12 +7,11 @@ export default function AdminClasses() {
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [classes, setClasses] = useState([])
-  const [trainers, setTrainers] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editClass, setEditClass] = useState(null)
   const [form, setForm] = useState({
-    name: '', description: '', trainer_id: '', day_of_week: 1,
+    name: '', description: '', day_of_week: 1,
     start_time: '09:00', end_time: '10:00', max_capacity: 20, location: '', is_active: true
   })
   const [submitting, setSubmitting] = useState(false)
@@ -30,8 +29,7 @@ export default function AdminClasses() {
         .eq('id', session.user.id)
         .single()
 
-      if (userData.role === 'member') { router.push('/member'); return }
-      if (userData.role === 'trainer') { router.push('/trainer'); return }
+      if (userData.role !== 'admin') { router.push('/member'); return }
 
       setUser(session.user)
       fetchData()
@@ -40,13 +38,8 @@ export default function AdminClasses() {
   }, [router])
 
   const fetchData = async () => {
-    const [classesRes, trainersRes] = await Promise.all([
-      supabase.from('classes').select('*, app_users:trainer_id(full_name)').order('day_of_week'),
-      supabase.from('app_users').select('id, full_name').in('role', ['trainer', 'admin'])
-    ])
-
-    setClasses(classesRes.data || [])
-    setTrainers(trainersRes.data || [])
+    const { data } = await supabase.from('classes').select('*').order('day_of_week')
+    setClasses(data || [])
     setLoading(false)
   }
 
@@ -60,7 +53,6 @@ export default function AdminClasses() {
     const classData = {
       name: form.name,
       description: form.description,
-      trainer_id: form.trainer_id || null,
       day_of_week: parseInt(form.day_of_week),
       start_time: form.start_time,
       end_time: form.end_time,
@@ -113,7 +105,6 @@ export default function AdminClasses() {
     setForm({
       name: cls.name,
       description: cls.description || '',
-      trainer_id: cls.trainer_id || '',
       day_of_week: cls.day_of_week,
       start_time: cls.start_time?.substring(0, 5) || '09:00',
       end_time: cls.end_time?.substring(0, 5) || '10:00',
@@ -125,7 +116,7 @@ export default function AdminClasses() {
   }
 
   const resetForm = () => {
-    setForm({ name: '', description: '', trainer_id: '', day_of_week: 1, start_time: '09:00', end_time: '10:00', max_capacity: 20, location: '', is_active: true })
+    setForm({ name: '', description: '', day_of_week: 1, start_time: '09:00', end_time: '10:00', max_capacity: 20, location: '', is_active: true })
   }
 
   if (loading) {
@@ -187,9 +178,8 @@ export default function AdminClasses() {
                       </div>
                       {cls.description && <p className="text-gray-400 text-sm">{cls.description}</p>}
                       <div className="flex flex-wrap gap-3 text-sm text-gray-400 mt-1">
-                        <span>⏰ {cls.start_time?.substring(0, 5)} - {cls.end_time?.substring(0, 5)}</span>
-                        {cls.app_users?.full_name && <span>👤 {cls.app_users.full_name}</span>}
-                        <span>👥 {cls.current_bookings || 0}/{cls.max_capacity}</span>
+                        <span>&#9201; {cls.start_time?.substring(0, 5)} - {cls.end_time?.substring(0, 5)}</span>
+                        <span>&#128101; {cls.current_bookings || 0}/{cls.max_capacity}</span>
                         {cls.location && <span>📍 {cls.location}</span>}
                       </div>
                     </div>
@@ -235,16 +225,6 @@ export default function AdminClasses() {
                 <label className="block text-gray-400 text-sm mb-1">Description</label>
                 <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})}
                   className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700" rows={2} placeholder="Describe the class..." />
-              </div>
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Trainer</label>
-                <select value={form.trainer_id} onChange={(e) => setForm({...form, trainer_id: e.target.value})}
-                  className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700">
-                  <option value="">No trainer assigned</option>
-                  {trainers.map(t => (
-                    <option key={t.id} value={t.id}>{t.full_name}</option>
-                  ))}
-                </select>
               </div>
               <div>
                 <label className="block text-gray-400 text-sm mb-1">Day of Week *</label>

@@ -24,7 +24,7 @@ export default function AdminAttendance() {
         .single()
 
       if (userData.role === 'member') { router.push('/member'); return }
-      if (userData.role === 'trainer') { router.push('/trainer'); return }
+      if (userData.role !== 'admin') { router.push('/member'); return }
 
       setUser(session.user)
       fetchData()

@@ -34,7 +34,7 @@ export default function MemberClasses() {
 
   const fetchData = async (userId) => {
     const [classesRes, bookingsRes] = await Promise.all([
-      supabase.from('classes').select('*, app_users:trainer_id(full_name)').eq('is_active', true).order('day_of_week'),
+      supabase.from('classes').select('*').eq('is_active', true).order('day_of_week'),
       supabase.from('class_bookings').select('*').eq('user_id', userId)
     ])
 
@@ -117,7 +117,7 @@ export default function MemberClasses() {
                     <div>
                       <p className="text-white font-bold">{cls.name}</p>
                       <p className="text-gray-300 text-sm">{days[cls.day_of_week]} • {cls.start_time?.substring(0, 5)} - {cls.end_time?.substring(0, 5)}</p>
-                      {cls.app_users?.full_name && <p className="text-gray-400 text-xs">Trainer: {cls.app_users.full_name}</p>}
+                      {cls.app_users?.full_name && <p className="text-gray-400 text-xs">Instructor: {cls.app_users.full_name}</p>}
                     </div>
                     <button onClick={() => handleCancel(cls)} className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
                       Cancel
