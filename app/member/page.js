@@ -37,10 +37,6 @@ export default function MemberDashboard() {
         router.push('/admin')
         return
       }
-      if (userData.role === 'trainer') {
-        router.push('/trainer')
-        return
-      }
 
       // First check for active membership, then pending, then latest
       let membershipData = null
@@ -462,7 +458,7 @@ export default function MemberDashboard() {
           {/* Personal Training */}
           <div className="bg-gray-900 rounded-lg p-6">
             <h3 className="text-lg font-bold text-white mb-3">Personal Training</h3>
-            <p className="text-gray-400 text-sm mb-4">View trainer, schedule & progress</p>
+            <p className="text-gray-400 text-sm mb-4">View schedule & progress</p>
             <button 
               onClick={() => router.push('/member/pt')}
               className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 text-sm"

@@ -22,7 +22,6 @@ export default function MemberPayments() {
         .single()
 
       if (userData.role === 'admin') { router.push('/admin'); return }
-      if (userData.role === 'trainer') { router.push('/trainer'); return }
 
       setUser(session.user)
       fetchData(session.user.id)

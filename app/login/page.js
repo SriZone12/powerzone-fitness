@@ -34,22 +34,8 @@ export default function Login() {
       return
     }
 
-    if (userData.role === 'trainer' && userData.account_status === 'pending') {
-      await supabase.auth.signOut()
-      setError('Your trainer account is pending admin approval. Please wait for the gym owner to activate your account.')
-      return
-    }
-
-    if (userData.role === 'trainer' && userData.account_status === 'rejected') {
-      await supabase.auth.signOut()
-      setError('Your trainer application has been rejected. Please contact the gym owner.')
-      return
-    }
-
     if (userData.role === 'admin') {
       router.push('/admin')
-    } else if (userData.role === 'trainer') {
-      router.push('/trainer')
     } else {
       router.push('/member')
     }

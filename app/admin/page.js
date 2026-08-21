@@ -7,12 +7,8 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [members, setMembers] = useState([])
-  const [trainers, setTrainers] = useState([])
   const [memberships, setMemberships] = useState([])
-  const [ptSubscriptions, setPtSubscriptions] = useState([])
-  const [pendingTrainers, setPendingTrainers] = useState([])
   const [pendingClaims, setPendingClaims] = useState([])
-  const [admissionFee, setAdmissionFee] = useState('')
   const [loading, setLoading] = useState(true)
   const [activeModal, setActiveModal] = useState(null)
 
@@ -26,27 +22,18 @@ export default function AdminDashboard() {
 
       setUser(userData)
       if (userData.role !== 'admin') {
-        if (userData.role === 'trainer') router.push('/trainer')
-        else router.push('/member')
+        router.push('/member')
         return
       }
 
-      const [membersRes, trainersRes, membershipsRes, ptRes, pendingRes, settingsRes, claimsRes] = await Promise.all([
+      const [membersRes, membershipsRes, claimsRes] = await Promise.all([
         supabase.from('app_users').select('*').eq('role', 'member'),
-        supabase.from('app_users').select('*').eq('role', 'trainer').eq('account_status', 'active'),
         supabase.from('member_memberships').select('*, membership_plan(*), app_users(*)'),
-        supabase.from('pt_subscriptions').select('*, app_users:user_id(full_name), pt_packages:package_id(name, price)'),
-        supabase.from('app_users').select('*').eq('role', 'trainer').eq('account_status', 'pending'),
-        supabase.from('gym_settings').select('value').eq('key', 'admission_fee').single(),
         supabase.from('app_users').select('*').eq('existing_member_claim', true).eq('claim_status', 'pending')
       ])
 
       setMembers(membersRes.data || [])
-      setTrainers(trainersRes.data || [])
       setMemberships(membershipsRes.data || [])
-      setPtSubscriptions(ptRes.data || [])
-      setPendingTrainers(pendingRes.data || [])
-      setAdmissionFee(settingsRes.data?.value || '1000')
       setPendingClaims(claimsRes.data || [])
       setLoading(false)
     }
@@ -58,37 +45,15 @@ export default function AdminDashboard() {
     router.push('/login')
   }
 
-  const getBestMembership = (userId) => {
-    const um = memberships.filter(m => m.user_id === userId)
-    if (um.length === 0) return null
-    const active = um.find(m => m.status === 'active')
-    if (active) return active
-    const pending = um.find(m => m.status === 'pending')
-    if (pending) return pending
-    return [...um].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
-  }
-
-  const handleApproveTrainer = async (userId) => {
-    const { error } = await supabase
-      .from('app_users')
-      .update({ account_status: 'active' })
-      .eq('id', userId)
-    if (!error) {
-      alert('Trainer approved! They can now login.')
-      getData()
-    }
-  }
-
-  const handleRejectTrainer = async (userId) => {
-    if (!confirm('Reject this trainer application? They will not be able to login.')) return
-    const { error } = await supabase
-      .from('app_users')
-      .update({ account_status: 'rejected' })
-      .eq('id', userId)
-    if (!error) {
-      alert('Trainer rejected.')
-      getData()
-    }
+  const getData = async () => {
+    const [membersRes, membershipsRes, claimsRes] = await Promise.all([
+      supabase.from('app_users').select('*').eq('role', 'member'),
+      supabase.from('member_memberships').select('*, membership_plan(*), app_users(*)'),
+      supabase.from('app_users').select('*').eq('existing_member_claim', true).eq('claim_status', 'pending')
+    ])
+    setMembers(membersRes.data || [])
+    setMemberships(membershipsRes.data || [])
+    setPendingClaims(claimsRes.data || [])
   }
 
   const handleApproveClaim = async (userId) => {
@@ -114,46 +79,21 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleUpdateAdmissionFee = async () => {
-    const amount = parseInt(admissionFee)
-    if (isNaN(amount) || amount < 0) {
-      alert('Please enter a valid amount')
-      return
-    }
-    const { error } = await supabase
-      .from('gym_settings')
-      .upsert({ key: 'admission_fee', value: amount.toString(), updated_at: new Date().toISOString() })
-    if (!error) {
-      alert('Admission fee updated to रू' + amount)
-    }
-  }
-
-  const getData = async () => {
-    const [membersRes, trainersRes, membershipsRes, ptRes, pendingRes, settingsRes, claimsRes] = await Promise.all([
-      supabase.from('app_users').select('*').eq('role', 'member'),
-      supabase.from('app_users').select('*').eq('role', 'trainer').eq('account_status', 'active'),
-      supabase.from('member_memberships').select('*, membership_plan(*), app_users(*)'),
-      supabase.from('pt_subscriptions').select('*, app_users:user_id(full_name), pt_packages:package_id(name, price)'),
-      supabase.from('app_users').select('*').eq('role', 'trainer').eq('account_status', 'pending'),
-      supabase.from('gym_settings').select('value').eq('key', 'admission_fee').single(),
-      supabase.from('app_users').select('*').eq('existing_member_claim', true).eq('claim_status', 'pending')
-    ])
-    setMembers(membersRes.data || [])
-    setTrainers(trainersRes.data || [])
-    setMemberships(membershipsRes.data || [])
-    setPtSubscriptions(ptRes.data || [])
-    setPendingTrainers(pendingRes.data || [])
-    setAdmissionFee(settingsRes.data?.value || '1000')
-    setPendingClaims(claimsRes.data || [])
+  const getBestMembership = (userId) => {
+    const um = memberships.filter(m => m.user_id === userId)
+    if (um.length === 0) return null
+    const active = um.find(m => m.status === 'active')
+    if (active) return active
+    const pending = um.find(m => m.status === 'pending')
+    if (pending) return pending
+    return [...um].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
   }
 
   const getModalTitle = () => {
     switch (activeModal) {
       case 'members': return 'All Members'
-      case 'trainers': return 'All Trainers'
       case 'active': return 'Active Memberships'
       case 'revenue': return 'Revenue Details'
-      case 'settings': return 'Gym Settings'
       default: return ''
     }
   }
@@ -163,7 +103,6 @@ export default function AdminDashboard() {
       case 'active': return 'text-green-500'
       case 'pending': return 'text-yellow-500'
       case 'expired': return 'text-red-500'
-      case 'rejected': return 'text-red-500'
       default: return 'text-gray-400'
     }
   }
@@ -191,24 +130,6 @@ export default function AdminDashboard() {
       <div className="max-w-6xl mx-auto p-4 sm:p-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8">Admin Dashboard</h2>
 
-        {/* Pending Trainer Approvals */}
-        {pendingTrainers.length > 0 && (
-          <div className="mb-6 space-y-3">
-            {pendingTrainers.map((t) => (
-              <div key={t.id} className="bg-blue-900 border-l-4 border-blue-500 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div>
-                  <p className="text-white font-bold">New Trainer Application</p>
-                  <p className="text-blue-300 text-sm">{t.full_name} ({t.email}) — {t.phone}</p>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleApproveTrainer(t.id)} className="bg-green-500 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-600">Approve</button>
-                  <button onClick={() => handleRejectTrainer(t.id)} className="bg-red-500 text-white px-4 py-2 rounded text-sm font-bold hover:bg-red-600">Reject</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Pending Existing Member Claims */}
         {pendingClaims.length > 0 && (
           <div className="mb-6 space-y-3">
@@ -229,34 +150,19 @@ export default function AdminDashboard() {
         )}
 
         {/* Pending Payment Alerts */}
-        {(memberships.filter(m => m.payment_status === 'pending').length > 0 || ptSubscriptions.filter(p => p.payment_status === 'pending').length > 0) && (
-          <div className="mb-6 space-y-3">
-            {memberships.filter(m => m.payment_status === 'pending').length > 0 && (
-              <button onClick={() => router.push('/admin/payments')}
-                className="w-full bg-yellow-900 border-l-4 border-yellow-500 rounded-lg p-4 flex items-center justify-between hover:bg-yellow-800 transition">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">💰</span>
-                  <div className="text-left">
-                    <p className="text-white font-bold">Pending Gym Payments</p>
-                    <p className="text-yellow-300 text-sm">{memberships.filter(m => m.payment_status === 'pending').length} member(s) waiting</p>
-                  </div>
+        {memberships.filter(m => m.payment_status === 'pending').length > 0 && (
+          <div className="mb-6">
+            <button onClick={() => router.push('/admin/payments')}
+              className="w-full bg-yellow-900 border-l-4 border-yellow-500 rounded-lg p-4 flex items-center justify-between hover:bg-yellow-800 transition">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">&#128176;</span>
+                <div className="text-left">
+                  <p className="text-white font-bold">Pending Payments</p>
+                  <p className="text-yellow-300 text-sm">{memberships.filter(m => m.payment_status === 'pending').length} member(s) waiting</p>
                 </div>
-                <span className="bg-yellow-500 text-black font-bold px-3 py-1 rounded-full text-sm">{memberships.filter(m => m.payment_status === 'pending').length}</span>
-              </button>
-            )}
-            {ptSubscriptions.filter(p => p.payment_status === 'pending').length > 0 && (
-              <button onClick={() => router.push('/admin/pt-manage')}
-                className="w-full bg-blue-900 border-l-4 border-blue-500 rounded-lg p-4 flex items-center justify-between hover:bg-blue-800 transition">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🏋️</span>
-                  <div className="text-left">
-                    <p className="text-white font-bold">Pending PT Payments</p>
-                    <p className="text-blue-300 text-sm">{ptSubscriptions.filter(p => p.payment_status === 'pending').length} PT subscription(s) waiting</p>
-                  </div>
-                </div>
-                <span className="bg-blue-500 text-white font-bold px-3 py-1 rounded-full text-sm">{ptSubscriptions.filter(p => p.payment_status === 'pending').length}</span>
-              </button>
-            )}
+              </div>
+              <span className="bg-yellow-500 text-black font-bold px-3 py-1 rounded-full text-sm">{memberships.filter(m => m.payment_status === 'pending').length}</span>
+            </button>
           </div>
         )}
 
@@ -266,49 +172,34 @@ export default function AdminDashboard() {
             className="bg-gray-900 rounded-lg p-4 sm:p-6 text-left hover:bg-gray-800 transition cursor-pointer border-2 border-transparent hover:border-orange-500">
             <h3 className="text-gray-400 mb-2 text-sm">Total Members</h3>
             <p className="text-2xl sm:text-4xl font-bold text-white">{members.length}</p>
-            <p className="text-orange-500 text-xs mt-2">Click to view →</p>
-          </button>
-
-          <button onClick={() => setActiveModal('trainers')}
-            className="bg-gray-900 rounded-lg p-4 sm:p-6 text-left hover:bg-gray-800 transition cursor-pointer border-2 border-transparent hover:border-orange-500">
-            <h3 className="text-gray-400 mb-2 text-sm">Active Trainers</h3>
-            <p className="text-2xl sm:text-4xl font-bold text-white">{trainers.length}</p>
-            <p className="text-orange-500 text-xs mt-2">Click to view →</p>
+            <p className="text-orange-500 text-xs mt-2">Click to view &#8594;</p>
           </button>
 
           <button onClick={() => setActiveModal('active')}
             className="bg-gray-900 rounded-lg p-4 sm:p-6 text-left hover:bg-gray-800 transition cursor-pointer border-2 border-transparent hover:border-green-500">
             <h3 className="text-gray-400 mb-2 text-sm">Active Memberships</h3>
             <p className="text-2xl sm:text-4xl font-bold text-green-500">{memberships.filter(m => m.status === 'active').length}</p>
-            <p className="text-green-500 text-xs mt-2">Click to view →</p>
+            <p className="text-green-500 text-xs mt-2">Click to view &#8594;</p>
           </button>
 
           <button onClick={() => setActiveModal('revenue')}
             className="bg-gray-900 rounded-lg p-4 sm:p-6 text-left hover:bg-gray-800 transition cursor-pointer border-2 border-transparent hover:border-orange-500">
             <h3 className="text-gray-400 mb-2 text-sm">Total Revenue</h3>
             <p className="text-2xl sm:text-4xl font-bold text-orange-500">
-              रू{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)}
+              &#8377;{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)}
             </p>
-            <p className="text-orange-500 text-xs mt-2">Click to view →</p>
+            <p className="text-orange-500 text-xs mt-2">Click to view &#8594;</p>
           </button>
-        </div>
 
-        {/* Member Breakdown */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 mb-8">
-          <div className="bg-purple-900 border-l-4 border-purple-500 rounded-lg p-4 sm:p-5">
-            <h3 className="text-gray-300 text-sm mb-1">Pre-App Members</h3>
-            <p className="text-2xl sm:text-3xl font-bold text-purple-400">{members.filter(m => m.is_pre_app_member).length}</p>
-            <p className="text-purple-300 text-xs mt-1">Already paying before the app</p>
-          </div>
-          <div className="bg-green-900 border-l-4 border-green-500 rounded-lg p-4 sm:p-5">
-            <h3 className="text-gray-300 text-sm mb-1">App Members</h3>
-            <p className="text-2xl sm:text-3xl font-bold text-green-400">{members.filter(m => !m.is_pre_app_member).length}</p>
-            <p className="text-green-300 text-xs mt-1">Joined through the app</p>
+          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
+            <h3 className="text-gray-400 mb-2 text-sm">Pre-App Members</h3>
+            <p className="text-2xl sm:text-4xl font-bold text-purple-500">{members.filter(m => m.is_pre_app_member).length}</p>
+            <p className="text-purple-400 text-xs mt-2">Already paying before app</p>
           </div>
         </div>
 
         {/* Management Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
             <h3 className="text-lg font-bold text-white mb-2">Membership Plans</h3>
             <p className="text-gray-400 text-sm mb-4">Create and manage plans</p>
@@ -322,21 +213,9 @@ export default function AdminDashboard() {
           </div>
 
           <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold text-white mb-2">Trainer Management</h3>
-            <p className="text-gray-400 text-sm mb-4">Manage trainers & roles</p>
-            <button onClick={() => router.push('/admin/staff')} className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">Manage Trainers</button>
-          </div>
-
-          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold text-white mb-2">PT Packages</h3>
-            <p className="text-gray-400 text-sm mb-4">Create PT packages</p>
-            <button onClick={() => router.push('/admin/pt-packages')} className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">Manage PT Packages</button>
-          </div>
-
-          <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold text-white mb-2">PT Subscriptions</h3>
-            <p className="text-gray-400 text-sm mb-4">Assign trainers & manage</p>
-            <button onClick={() => router.push('/admin/pt-manage')} className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Manage PT</button>
+            <h3 className="text-lg font-bold text-white mb-2">Member Management</h3>
+            <p className="text-gray-400 text-sm mb-4">Setup plans, manage members</p>
+            <button onClick={() => router.push('/admin/staff')} className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">Manage Members</button>
           </div>
 
           <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
@@ -413,7 +292,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-          <p className="text-gray-500 text-xs mt-2 text-center sm:hidden">← Swipe →</p>
+          <p className="text-gray-500 text-xs mt-2 text-center sm:hidden">&#8592; Swipe &#8594;</p>
         </div>
       </div>
 
@@ -465,25 +344,6 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {activeModal === 'trainers' && (
-                <div>
-                  <p className="text-gray-400 mb-4">{trainers.length} active trainer(s)</p>
-                  {trainers.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">No trainers yet</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {trainers.map((t) => (
-                        <div key={t.id} className="bg-gray-800 rounded-lg p-4">
-                          <p className="text-white font-bold">{t.full_name}</p>
-                          <p className="text-gray-400 text-sm">{t.email}</p>
-                          {t.phone && <p className="text-gray-400 text-sm">{t.phone}</p>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
               {activeModal === 'active' && (
                 <div>
                   <p className="text-gray-400 mb-4">{memberships.filter(m => m.status === 'active').length} active</p>
@@ -513,8 +373,8 @@ export default function AdminDashboard() {
               {activeModal === 'revenue' && (
                 <div>
                   <p className="text-gray-400 mb-4">
-                    रू{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)} 
-                    total from {memberships.filter(m => m.payment_status === 'confirmed').length} payments
+                    &#8377;{memberships.filter(m => m.payment_status === 'confirmed').reduce((sum, m) => sum + (m.membership_plan?.price || 0) + (m.admission_fee || 0), 0)}
+                    {' '}total from {memberships.filter(m => m.payment_status === 'confirmed').length} payments
                   </p>
                   {memberships.filter(m => m.payment_status === 'confirmed').length === 0 ? (
                     <p className="text-gray-500 text-center py-8">No confirmed payments</p>
@@ -528,9 +388,9 @@ export default function AdminDashboard() {
                               <p className="text-gray-400 text-xs">{m.membership_plan?.name}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-orange-500 font-bold">रू{m.membership_plan?.price}</p>
+                              <p className="text-orange-500 font-bold">&#8377;{m.membership_plan?.price}</p>
                               {m.admission_fee > 0 && (
-                                <p className="text-yellow-500 text-xs">+ रू{m.admission_fee} admission</p>
+                                <p className="text-yellow-500 text-xs">+ &#8377;{m.admission_fee} admission</p>
                               )}
                               <p className="text-green-500 text-xs">Confirmed</p>
                             </div>

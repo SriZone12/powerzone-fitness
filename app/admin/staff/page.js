@@ -46,19 +46,6 @@ export default function AdminStaff() {
     setLoading(false)
   }
 
-  const handleRoleChange = async (userId, newRole) => {
-    const { error } = await supabase
-      .from('app_users')
-      .update({ role: newRole })
-      .eq('id', userId)
-    if (!error) {
-      alert('Role updated!')
-      fetchData()
-    } else {
-      alert('Error: ' + error.message)
-    }
-  }
-
   const togglePreApp = async (userId, currentStatus) => {
     const newStatus = !currentStatus
     const updates = {
@@ -133,24 +120,13 @@ export default function AdminStaff() {
     setShowModal(true)
   }
 
-  const trainerList = allUsers.filter(u => u.role === 'trainer')
-  const admins = allUsers.filter(u => u.role === 'admin')
   const members = allUsers.filter(u => u.role === 'member')
   const preAppMembers = members.filter(u => u.is_pre_app_member)
   const appMembers = members.filter(u => !u.is_pre_app_member)
 
-  const filteredUsers = filter === 'all' ? allUsers :
-    filter === 'trainer' ? trainerList :
-    filter === 'admin' ? admins :
-    filter === 'member' ? members :
+  const filteredUsers = filter === 'all' ? members :
     filter === 'pre-app' ? preAppMembers :
-    allUsers
-
-  const roleBadge = {
-    admin: 'bg-red-600',
-    trainer: 'bg-blue-600',
-    member: 'bg-green-600'
-  }
+    members
 
   if (loading) {
     return (
@@ -164,7 +140,7 @@ export default function AdminStaff() {
     <div className="min-h-screen bg-black">
       <div className="bg-gray-900 p-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <h1 className="text-xl sm:text-2xl font-bold text-white">User Management</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Member Management</h1>
           <button onClick={() => router.push('/admin')} className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm">
             Back to Dashboard
           </button>
@@ -172,18 +148,10 @@ export default function AdminStaff() {
       </div>
 
       <div className="max-w-6xl mx-auto p-4 sm:p-8">
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-gray-900 rounded-lg p-3">
-            <p className="text-gray-400 text-xs sm:text-sm">Total Users</p>
-            <p className="text-lg sm:text-2xl font-bold text-white">{allUsers.length}</p>
-          </div>
-          <div className="bg-gray-900 rounded-lg p-3">
-            <p className="text-gray-400 text-xs sm:text-sm">Admins</p>
-            <p className="text-lg sm:text-2xl font-bold text-red-500">{admins.length}</p>
-          </div>
-          <div className="bg-gray-900 rounded-lg p-3">
-            <p className="text-gray-400 text-xs sm:text-sm">Trainers</p>
-            <p className="text-lg sm:text-2xl font-bold text-blue-500">{trainerList.length}</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Total Members</p>
+            <p className="text-lg sm:text-2xl font-bold text-white">{members.length}</p>
           </div>
           <div className="bg-gray-900 rounded-lg p-3">
             <p className="text-gray-400 text-xs sm:text-sm">Pre-App Members</p>
@@ -197,15 +165,12 @@ export default function AdminStaff() {
 
         <div className="flex gap-2 mb-6 overflow-x-auto">
           {[
-            { key: 'all', label: 'All' },
-            { key: 'admin', label: 'Admins' },
-            { key: 'trainer', label: 'Trainers' },
-            { key: 'member', label: 'All Members' },
+            { key: 'all', label: 'All Members' },
             { key: 'pre-app', label: 'Pre-App Members' }
           ].map(f => (
             <button key={f.key} onClick={() => setFilter(f.key)}
               className={`px-4 py-2 rounded text-sm whitespace-nowrap ${filter === f.key ? 'bg-orange-500 text-white' : 'bg-gray-700 text-gray-300'}`}>
-              {f.label} ({f.key === 'all' ? allUsers.length : f.key === 'admin' ? admins.length : f.key === 'trainer' ? trainerList.length : f.key === 'pre-app' ? preAppMembers.length : members.length})
+              {f.label} ({f.key === 'all' ? members.length : preAppMembers.length})
             </button>
           ))}
         </div>
@@ -217,7 +182,6 @@ export default function AdminStaff() {
                 <tr className="text-left text-gray-400 border-b border-gray-700">
                   <th className="p-3">Name</th>
                   <th className="p-3">Email</th>
-                  <th className="p-3">Role</th>
                   <th className="p-3">Member Type</th>
                   <th className="p-3">Actions</th>
                 </tr>
@@ -230,11 +194,6 @@ export default function AdminStaff() {
                       {u.phone && <p className="text-gray-500 text-xs">{u.phone}</p>}
                     </td>
                     <td className="p-3 text-gray-400 text-sm">{u.email}</td>
-                    <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded text-xs text-white ${roleBadge[u.role]}`}>
-                        {u.role}
-                      </span>
-                    </td>
                     <td className="p-3">
                       {u.role === 'member' ? (
                         <div className="flex items-center gap-2">
@@ -253,28 +212,13 @@ export default function AdminStaff() {
                             Setup Plan
                           </button>
                         </div>
-                      ) : (
-                        <span className="text-gray-500 text-xs">-</span>
-                      )}
+                      ) : null}
                     </td>
                     <td className="p-3">
-                      <div className="flex gap-2">
-                        <button onClick={() => openProfile(u)}
-                          className="bg-gray-700 text-white px-3 py-1 rounded text-xs hover:bg-gray-600">
-                          View
-                        </button>
-                        {u.id !== user?.id && (
-                          <select
-                            value={u.role}
-                            onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                            className="bg-gray-700 text-white px-2 py-1 rounded text-xs border border-gray-600"
-                          >
-                            <option value="member">Member</option>
-                            <option value="trainer">Trainer</option>
-                            <option value="admin">Admin</option>
-                          </select>
-                        )}
-                      </div>
+                      <button onClick={() => openProfile(u)}
+                        className="bg-gray-700 text-white px-3 py-1 rounded text-xs hover:bg-gray-600">
+                        View
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -293,10 +237,6 @@ export default function AdminStaff() {
                 <div>
                   <p className="text-gray-400 text-sm">Name</p>
                   <p className="text-white font-bold">{selectedUser.full_name}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Role</p>
-                  <span className={`px-2 py-0.5 rounded text-xs text-white ${roleBadge[selectedUser.role]}`}>{selectedUser.role}</span>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">Email</p>
